@@ -18,7 +18,7 @@
             </button>
 
             <a class="logoContainer" href="index.php">
-                <img src="assets/images/icons/ITubeLogo.png" title="logo" alt="Site logo">
+                <img src="assets/images/icons/ITubeLogo.png" title="ITube" alt="Site logo">
             </a>
 
             <div class="searchBarContainer">

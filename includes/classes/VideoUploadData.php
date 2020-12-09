@@ -12,5 +12,23 @@ class VideoUploadData {
         $this->category = $category;
         $this->uploader = $uploader;
     }
+    public function getVideoDataArray() {
+        return $this->videoDataArray;
+    }
+    public function getTitle() {
+        return $this->title;
+    }
+    public function getDescription() {
+        return $this->description;
+    }
+    public function getPrivacy() {
+        return $this->privacy;
+    }
+    public function getCategory() {
+        return $this->category;
+    }
+    public function getUploader() {
+        return $this->uploader;
+    }
 }
 ?>
