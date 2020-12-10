@@ -10,3 +10,7 @@ $(document).ready(function() {
         main.toggleClass("leftPadding");
     })
 });
+
+function notSignedIn() {
+    $("#loginModal").modal("toggle");
+}

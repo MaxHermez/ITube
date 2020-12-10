@@ -18,8 +18,17 @@ if(isset($_POST["submitButton"])) {
     $password = FormSanitizer::sanitizeFormPassword($_POST["password"]);
     $passwordc = FormSanitizer::sanitizeFormPassword($_POST["passwordc"]);
 
-    $account->register($firstName,$lastname,$username,$email,$emailc,$password,$passwordc);
-    
+    $success = $account->register($firstName,$lastname,$username,$email,$emailc,$password,$passwordc);
+    if($success) {
+        $_SESSION["loggedIn"] = $username;
+        header("Location: index.php");
+    }
+}
+
+function getInputValue($name) {
+    if(isset($_POST[$name])) {
+        echo $_POST[$name];
+    }
 }
 
 ?>
@@ -47,16 +56,23 @@ if(isset($_POST["submitButton"])) {
             <div class="loginForm">
                 <form action="signUp.php" method="POST">
                     <?php echo $account->getError(Constants::$nameLength); ?>
-                    <input type="text" name="firstName" placeholder="First Name" autocomplete="off" required>
+                    <input type="text" name="firstName" value="<?php getInputValue('firstName'); ?>" placeholder="First Name" autocomplete="off" required>
                     <?php echo $account->getError(Constants::$nameLength); ?>
-                    <input type="text" name="lastName" placeholder="Last Name" autocomplete="off" required>
+                    <input type="text" name="lastName" value="<?php getInputValue('lastName'); ?>" placeholder="Last Name" autocomplete="off" required>
+                    
                     <?php echo $account->getError(Constants::$usernameLength); ?>
                     <?php echo $account->getError(Constants::$usernameTaken); ?>
-                    <input type="text" name="username" placeholder="Username" autocomplete="off" required>
+                    <input type="text" name="username" value="<?php getInputValue('username'); ?>" placeholder="Username" autocomplete="off" required>
                     
-                    <input type="email" name="email" placeholder="Your Email" require>
-                    <input type="email" name="emailc" placeholder="Confirm Email" autocomplete="off" required>
+                    <?php echo $account->getError(Constants::$emailLength); ?>
+                    <?php echo $account->getError(Constants::$emailsMismatch); ?>
+                    <?php echo $account->getError(Constants::$emailInvalid); ?>
+                    <?php echo $account->getError(Constants::$emailTaken); ?>
+                    <input type="email" name="email" value="<?php getInputValue('email'); ?>" placeholder="Your Email" require>
+                    <input type="email" name="emailc" value="<?php getInputValue('emailc'); ?>" placeholder="Confirm Email" autocomplete="off" required>
 
+                    <?php echo $account->getError(Constants::$passwordsMismatch); ?>
+                    <?php echo $account->getError(Constants::$passwordCharacters); ?>
                     <input type="password" name="password" placeholder="New Password" autocomplete="off" required>
                     <input type="password" name="passwordc" placeholder="Confirm Password" autocomplete="off" required>
                     

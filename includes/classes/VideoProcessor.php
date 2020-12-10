@@ -8,7 +8,7 @@ Class VideoProcessor {
     public function __construct($con) {
         $this->con = $con;
         $this->ffmpegPath=realpath("ffmpeg/ffmpeg.exe");
-        $this->ffprobePath=realpath("ffmpeg/ffprobe.exe");
+        $this->ffprobePath=realpath("./ffmpeg/ffprobe.exe");
     }
 
     public function upload($videoUploadData) {
@@ -33,7 +33,7 @@ Class VideoProcessor {
             if(!$this->deleteFile($tempPath)) {
                 return false;
             }
-            if(!$this->generateThumbnails($tempPath)) {
+            if(!$this->generateThumbnails($finalPath)) {
                 return false;
             }
             return true;
@@ -104,7 +104,7 @@ Class VideoProcessor {
     }
     public function generateThumbnails($filePath) {
         $thumbnailSize = "210x118"; #taken from youtube
-        $numThumbnails = 5;
+        $numThumbnails = 3;
         $pathToThumbnail = "uploads/videos/thumbnails";
         $duration = $this->getVideoDuration($filePath);
         $videoId = $this->con->lastInsertId();
@@ -112,7 +112,7 @@ Class VideoProcessor {
 
         for($num=1;$num<=$numThumbnails;$num++) {
             $imageName = uniqid().".jpg";
-            $interval = ($duration*0.8)/$numThumbnails*$num;
+            $interval = ($duration*0.1)+($duration*0.8/$numThumbnails)*$num;
             $fullThumbnailPath = "$pathToThumbnail/$videoId-$imageName";
             // calling ffmpeg to give up the frame at $interval
             $cmd = "$this->ffmpegPath -i $filePath -ss $interval -s $thumbnailSize -vframes 1 $fullThumbnailPath";
@@ -135,8 +135,8 @@ Class VideoProcessor {
                 echo "Failed to insert thumbnail";
                 return false;
             }
-        return true;
         }
+        return true;
     }
     private function getVideoDuration($filePath) {
         return (int) shell_exec("$this->ffprobePath -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 $filePath");
@@ -147,8 +147,8 @@ Class VideoProcessor {
         $secs = floor($duration % 60);
 
         $hours = ($hours<1) ? "" : $hours.":";
-        $mins = ($hours<10) ? "0" . $mins.":" : $mins . ":";
-        $secs = ($hours<10) ? "0" . $secs : $secs;
+        $mins = ($mins<10) ? "0" . $mins.":" : $mins . ":";
+        $secs = ($secs<10) ? "0" . $secs : $secs;
         $duration = $hours.$mins.$secs;
         $q = $this->con->prepare("UPDATE videos SET duration=:duration WHERE id=:videoID");
         $q->bindParam(":duration", $duration);
