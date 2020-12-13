@@ -84,16 +84,25 @@ Class VideoProcessor {
         return $q->execute();
     }
     public function convertVideoToMp4($tempPath, $finalPath) {
-        $cmd = "$this->ffmpegPath -i $tempPath $finalPath";
-        $outputLog = array();
-        exec($cmd, $outputLog, $returnCode);
-        if($returnCode!=0) {
-            foreach($outputLog as $line) {
-                echo $line . "<br>";
+        if(substr($tempPath, -4)==".mp4") {
+            if (!copy($tempPath, $finalPath)) {
+                echo "error while copying the file.<br>";
+                return false;
             }
-            return false;
+            return true;
         }
-        return true;
+        else {
+            $cmd = "$this->ffmpegPath -i $tempPath $finalPath";
+            $outputLog = array();
+            exec($cmd, $outputLog, $returnCode);
+            if($returnCode!=0) {
+                foreach($outputLog as $line) {
+                    echo $line . "<br>";
+                }
+                return false;
+            }
+            return true;
+        }
     }
     private function deleteFile($filePath) {
         if(!unlink($filePath)) {

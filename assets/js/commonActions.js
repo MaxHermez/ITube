@@ -12,5 +12,5 @@ $(document).ready(function() {
 });
 
 function notSignedIn() {
-    $("#loginModal").modal("toggle");
+    $("#loginModal").modal('show');
 }

@@ -1,7 +1,12 @@
 <?php 
 require_once("includes/config.php"); 
 require_once("includes/classes/User.php"); 
+require_once("includes/classes/ButtonMaker.php"); 
 require_once("includes/classes/Video.php"); 
+require_once("includes/classes/VideoGrid.php"); 
+require_once("includes/classes/VideoGridItem.php"); 
+require_once("includes/classes/SubscriptionsProvider.php"); 
+require_once("includes/classes/NavigationMenuProvider.php"); 
 
 $loggedInUsername = User::isLoggedIn() ? $_SESSION["loggedIn"] : "";
 $loggedInUser = new User($con, $loggedInUsername);
@@ -10,11 +15,13 @@ $loggedInUser = new User($con, $loggedInUsername);
 <html lang="en">
 <head>
     <title>ITube</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
-    <link rel="stylesheet" type="text/css" href="assets/css/style.css">
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">    <link rel="stylesheet" type="text/css" href="assets/css/style.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
     <script src="assets/js/commonActions.js"></script>
+    <script src="assets/js/userActions.js"></script>
 </head>
 <body>
     <div id="pageContainer">
@@ -41,14 +48,17 @@ $loggedInUser = new User($con, $loggedInUsername);
                 <a href="upload.php">
                     <img class="upload" src="assets/images/icons/upload.png" alt="">
                 </a>
-                <a href="#">
-                    <img class="upload" src="assets/images/profilePictures/default.png" alt="">
-                </a>
+                <?php 
+                    echo ButtonMaker::createUserProfileNavButton($con, $loggedInUser->getUsername());
+                ?>
             </div>
 
         </div>
         <div id="sideNavContainer" style="display: none;">
-
+            <?php 
+            $navigationProvider = new NavigationMenuProvider($con, $loggedInUser);
+            echo $navigationProvider->create();
+            ?>
         </div>
         <div id="mainSectionContainer">
             <div id="mainContentContainer">

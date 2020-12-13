@@ -59,7 +59,7 @@ class Account {
         }
     }
     private function validateUsername($un) {
-        if(strlen($un)>25 || strlen($un) < 2) {
+        if(strlen($un)>50 || strlen($un) < 2) {
             array_push($this->errors, Constants::$usernameLength);
             return;
         }
@@ -81,11 +81,42 @@ class Account {
             array_push($this->errors, Constants::$emailLength);
             return;
         }
-        $q = $this->con->prepare("SELECT email FROM users WHERE username=:em");
+        $q = $this->con->prepare("SELECT email FROM users WHERE email=:em");
         $q->bindParam(":em", $em);
         $q->execute();
         if($q->rowCount() != 0) {
             array_push($this->errors, Constants::$emailTaken);
+        }
+    }
+    private function validateEmail2($em, $un) {
+        if(!filter_var($em, FILTER_VALIDATE_EMAIL)) {
+            array_push($this->errors, Constants::$emailInvalid);
+        }
+        if(strlen($em)>255 || strlen($em) < 8) {
+            array_push($this->errors, Constants::$emailLength);
+            return;
+        }
+        $q = $this->con->prepare("SELECT email FROM users WHERE email=:em AND username!=:un");
+        $q->bindParam(":em", $em);
+        $q->bindParam(":un", $un);
+        $q->execute();
+        if($q->rowCount() != 0) {
+            array_push($this->errors, Constants::$emailTaken);
+        }
+    }
+    private function verifyPassword($un, $pw) {
+        $pw = hash("sha512", $pw);
+        $q = $this->con->prepare("SELECT password FROM users WHERE username=:un");
+        $q->bindParam(":un", $un);
+        $q->execute();
+        $data = $q->fetch(PDO::FETCH_ASSOC);
+        $hash = $data["password"];
+        if($pw == $hash) {
+            return true;
+        }
+        else {
+            array_push($this->errors, Constants::$passwordInvalid);
+            return false;
         }
     }
     private function validatePasswords($pw,$pwc) {
@@ -99,6 +130,47 @@ class Account {
     public function getError($error) {
         if(in_array($error, $this->errors)) {
             return "<span class='errorMessage'>$error</span>";
+        }
+    }
+    public function updateDetails($fn, $ln, $em, $un, $pw) {
+        $this->validateFirstName($fn);
+        $this->validateLastName($ln);
+        $this->validateEmail2($em, $un);
+        $this->verifyPassword($un, $pw);
+        if(empty($this->errors)) {
+            $q = $this->con->prepare("UPDATE users SET firstName=:fn, lastName=:ln, email=:em WHERE username=:un");
+            $q->bindParam(":fn", $fn);
+            $q->bindParam(":ln", $ln);
+            $q->bindParam(":em", $em);
+            $q->bindParam(":un", $un);
+            return $q->execute();
+        }
+        else {
+            
+            return false;
+        }
+    }
+    public function getFirstError() {
+        if(!empty($this->errors)) {
+            return $this->errors[0];
+        }
+        else {
+            return "";
+        }
+    }
+    public function updatePassword($pw, $npw, $npwc, $un) {
+        $this->verifyPassword($un, $pw);
+        $this->validatePasswords($npw, $npwc);
+        $npw = hash("sha512", $npw);
+        if(empty($this->errors)) {
+            $q = $this->con->prepare("UPDATE users SET password=:npw WHERE username=:un");
+            $q->bindParam(":npw", $npw);
+            $q->bindParam(":un", $un);
+            return $q->execute();
+        }
+        else {
+            
+            return false;
         }
     }
 }

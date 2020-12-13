@@ -27,7 +27,7 @@ class VideoDetailsForm {
     }
     private function createFileInput() 
     {   return "<div class='form-group'>
-                    <label for='exampleFormControlFile1'>Upload your video</label>
+                    <label for='exampleFormControlFile1' class='uploadFileLabel'>Upload your video</label>
                     <input type='file' class='form-control-file' name='fileInput' id='exampleFormControlFile1' required>
                 </div>";
     }

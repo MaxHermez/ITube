@@ -41,7 +41,12 @@ class Video {
         return $this->data["category"];
     }
     public function getUploadDate() {
-        return $this->data["uploadDate"];
+        $date = $this->data["uploadDate"];
+        return date("M j, Y", strtotime($date));
+    }
+    public function getTimestamp() {
+        $date = $this->data["uploadDate"];
+        return date("M jS, Y", strtotime($date));
     }
     public function getViews() {
         return $this->data["views"];
@@ -169,6 +174,32 @@ class Video {
         if($q->rowCount() > 0) {
             return true;
         }
+    }
+    public function getCommentsCount() {
+        $id = $this->getId();
+        $q = $this->con->prepare("SELECT * FROM comments WHERE videoId=:videoId");
+        $q->bindParam(":videoId", $id);
+        $q->execute();
+        return $q->rowCount();
+    }
+    public function getComments() {
+        $id = $this->getId();
+        $q = $this->con->prepare("SELECT * FROM comments WHERE videoId=:videoId AND responseTo=0 ORDER BY datePosted DESC");
+        $q->bindParam(":videoId", $id);
+        $q->execute();
+        $comments = array();
+        while($row = $q->fetch(PDO::FETCH_ASSOC)) {
+            $comment = new Comment($this->con, $row, $this->loggedInUser, $id);
+            array_push($comments, $comment);
+        }
+        return $comments;
+    }
+    public function getThumbnail() {
+        $videoId = $this->getId();
+        $q = $this->con->prepare("SELECT filePath FROM thumbnails WHERE videoId=:videoId AND selected=1");
+        $q->bindParam(":videoId",$videoId);
+        $q->execute();
+        return $q->fetchColumn();
     }
 }
 
